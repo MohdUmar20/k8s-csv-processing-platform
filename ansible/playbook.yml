@@ -1,0 +1,38 @@
+---
+- name: Configure and deploy CSV processor locally
+  hosts: local
+  gather_facts: false
+
+  tasks:
+    - name: Validate S3 bucket input
+      ansible.builtin.assert:
+        that:
+          - s3_bucket_name | length > 0
+        fail_msg: "Pass -e s3_bucket_name=<bucket> before deploying."
+
+    - name: Ensure namespace exists
+      ansible.builtin.command:
+        cmd: kubectl create namespace {{ namespace }} --dry-run=client -o yaml
+      register: namespace_yaml
+      changed_when: false
+
+    - name: Apply namespace
+      ansible.builtin.command:
+        cmd: kubectl apply -f -
+        stdin: "{{ namespace_yaml.stdout }}"
+      changed_when: "'created' in namespace_apply.stdout"
+      register: namespace_apply
+
+    - name: Deploy or upgrade Helm release
+      ansible.builtin.command: >
+        helm upgrade --install {{ release_name }} {{ helm_chart_path }}
+        --namespace {{ namespace }}
+        --set image.repository={{ image_repository }}
+        --set image.tag={{ image_tag }}
+        --set image.pullPolicy={{ image_pull_policy }}
+        --set app.awsProfile={{ aws_profile }}
+        --set app.awsRegion={{ aws_region }}
+        --set app.s3BucketName={{ s3_bucket_name }}
+        --set app.s3UploadPrefix={{ s3_upload_prefix }}
+      changed_when: true
+

@@ -1,0 +1,11 @@
+release_name: csv-processor
+namespace: csv-processor
+image_repository: k8s-csv-processing-platform
+image_tag: local
+image_pull_policy: Never
+aws_profile: aws-personal
+aws_region: eu-west-1
+s3_bucket_name: ""
+s3_upload_prefix: processed-csv
+helm_chart_path: ../helm/csv-processor
+

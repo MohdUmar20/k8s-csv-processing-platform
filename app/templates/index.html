@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="panel">
+  <h1>Upload CSV</h1>
+  <p class="muted">Upload a three-column CSV containing product ID, product name, and numeric value.</p>
+  {% if error %}
+  <div class="alert">{{ error }}</div>
+  {% endif %}
+  <form action="/upload" method="post" enctype="multipart/form-data">
+    <input type="file" name="file" accept=".csv,text/csv" required>
+    <button type="submit">Process CSV</button>
+  </form>
+</section>
+
+<section class="panel">
+  <h2>Previously Processed Files</h2>
+  {% include "partials/files_table.html" %}
+</section>
+{% endblock %}
+

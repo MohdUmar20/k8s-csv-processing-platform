@@ -1,0 +1,50 @@
+apiVersion: kops.k8s.io/v1alpha2
+kind: Cluster
+metadata:
+  name: csv-processor.example.com
+spec:
+  cloudProvider: aws
+  configBase: s3://replace-with-kops-state-store/csv-processor.example.com
+  kubernetesVersion: "1.29.2"
+  networkCIDR: 10.0.0.0/16
+  networkID: vpc-xxxxxxxx
+  topology:
+    masters: private
+    nodes: private
+  subnets:
+    - name: eu-west-1a
+      zone: eu-west-1a
+      type: Private
+      cidr: 10.0.32.0/19
+    - name: eu-west-1b
+      zone: eu-west-1b
+      type: Private
+      cidr: 10.0.64.0/19
+    - name: utility-eu-west-1a
+      zone: eu-west-1a
+      type: Utility
+      cidr: 10.0.0.0/22
+    - name: utility-eu-west-1b
+      zone: eu-west-1b
+      type: Utility
+      cidr: 10.0.4.0/22
+  iam:
+    allowContainerRegistry: true
+    legacy: false
+  authorization:
+    rbac: {}
+  networking:
+    calico: {}
+  api:
+    loadBalancer:
+      type: Public
+  etcdClusters:
+    - name: main
+      members:
+        - name: a
+          instanceGroup: master-eu-west-1a
+    - name: events
+      members:
+        - name: a
+          instanceGroup: master-eu-west-1a
+

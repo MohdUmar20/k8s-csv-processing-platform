@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "csv-processor.fullname" . }}-config
+  labels:
+    {{- include "csv-processor.labels" . | nindent 4 }}
+data:
+  APP_TITLE: {{ .Values.app.title | quote }}
+  AWS_PROFILE: {{ .Values.app.awsProfile | quote }}
+  AWS_REGION: {{ .Values.app.awsRegion | quote }}
+  S3_BUCKET_NAME: {{ .Values.app.s3BucketName | quote }}
+  S3_UPLOAD_PREFIX: {{ .Values.app.s3UploadPrefix | quote }}
+  PUBLIC_DIR: {{ .Values.app.publicDir | quote }}
+

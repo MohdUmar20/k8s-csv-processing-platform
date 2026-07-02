@@ -1,0 +1,28 @@
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
+  labels:
+    kops.k8s.io/cluster: csv-processor.example.com
+  name: nodes-spot-mixed
+spec:
+  role: Node
+  subnets:
+    - eu-west-1a
+    - eu-west-1b
+  mixedInstancesPolicy:
+    instances:
+      - t3.medium
+      - t3a.medium
+      - t4g.medium
+    onDemandBase: 0
+    onDemandAboveBase: 0
+    spotAllocationStrategy: capacity-optimized
+  minSize: 0
+  maxSize: 5
+  rootVolumeSize: 50
+  nodeLabels:
+    capacity: spot
+  cloudLabels:
+    k8s.io/cluster-autoscaler/enabled: "true"
+    k8s.io/cluster-autoscaler/csv-processor.example.com: "owned"
+

@@ -1,0 +1,25 @@
+{% if files %}
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>S3 Key</th>
+        <th>Size</th>
+        <th>Last Modified</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in files %}
+      <tr>
+        <td><code>{{ item.key }}</code></td>
+        <td>{{ item.size }} bytes</td>
+        <td>{{ item.last_modified }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p class="muted">No processed files found or S3 is not configured yet.</p>
+{% endif %}
+

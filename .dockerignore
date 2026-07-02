@@ -1,0 +1,15 @@
+.git
+.venv
+.pytest_cache
+.terraform
+*.tfstate
+*.tfstate.*
+tmp
+docs
+terraform
+kops
+ansible
+helm
+tests
+sample-data
+

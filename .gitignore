@@ -1,0 +1,17 @@
+.DS_Store
+.venv/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+*.pyc
+.env
+.env.*
+!.env.example
+dist/
+build/
+.terraform/
+*.tfstate
+*.tfstate.*
+tmp/
+coverage.xml
+htmlcov/

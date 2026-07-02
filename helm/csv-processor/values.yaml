@@ -1,0 +1,49 @@
+replicaCount: 1
+
+image:
+  repository: k8s-csv-processing-platform
+  tag: local
+  pullPolicy: Never
+
+nginx:
+  image: nginx:1.27-alpine
+
+service:
+  type: NodePort
+  port: 80
+  targetPort: 8080
+
+app:
+  title: K8s CSV Processing Platform
+  awsProfile: aws-personal
+  awsRegion: eu-west-1
+  s3BucketName: ""
+  s3UploadPrefix: processed-csv
+  publicDir: /shared/public
+
+awsCredentialsSecret:
+  name: aws-credentials
+  mountPath: /home/appuser/.aws
+
+resources:
+  app:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  nginx:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+

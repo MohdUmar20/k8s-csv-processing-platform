@@ -1,0 +1,15 @@
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
+  labels:
+    kops.k8s.io/cluster: csv-processor.example.com
+  name: master-eu-west-1a
+spec:
+  role: Master
+  subnets:
+    - eu-west-1a
+  machineType: t3.medium
+  minSize: 1
+  maxSize: 1
+  rootVolumeSize: 50
+

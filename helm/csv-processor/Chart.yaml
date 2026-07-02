@@ -1,0 +1,7 @@
+apiVersion: v2
+name: csv-processor
+description: CSV processing web application with Nginx sidecar and S3 storage
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+

@@ -1,0 +1,21 @@
+apiVersion: kops.k8s.io/v1alpha2
+kind: InstanceGroup
+metadata:
+  labels:
+    kops.k8s.io/cluster: csv-processor.example.com
+  name: nodes-on-demand
+spec:
+  role: Node
+  subnets:
+    - eu-west-1a
+    - eu-west-1b
+  machineType: t3.medium
+  minSize: 1
+  maxSize: 3
+  rootVolumeSize: 50
+  nodeLabels:
+    capacity: on-demand
+  cloudLabels:
+    k8s.io/cluster-autoscaler/enabled: "true"
+    k8s.io/cluster-autoscaler/csv-processor.example.com: "owned"
+

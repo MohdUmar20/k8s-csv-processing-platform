@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="panel">
+  <h1>Processed {{ row_count }} Rows</h1>
+  <p class="muted">Uploaded to S3 key: <code>{{ s3_key }}</code></p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Product ID</th>
+          <th>Name</th>
+          <th>Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for product in products %}
+        <tr>
+          <td>{{ product.product_id }}</td>
+          <td>{{ product.name }}</td>
+          <td>{{ product.value }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="panel">
+  <h2>Previously Processed Files</h2>
+  {% include "partials/files_table.html" %}
+</section>
+{% endblock %}
+
