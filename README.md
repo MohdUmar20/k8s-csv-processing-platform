@@ -8,9 +8,7 @@ The project is intentionally practical. The application can be validated locally
 
 ## Demo Reel
 
-[![K8s CSV Processing Platform demo reel](docs/k8s-csv-platform-demo-reel-thumbnail.jpg)](docs/k8s-csv-platform-demo-reel.mp4)
-
-[Watch the neobrutalist project demo reel](docs/k8s-csv-platform-demo-reel.mp4)
+![K8s CSV Processing Platform demo reel](docs/spidersilk-neobrutalist-promo.gif)
 
 ## Project Evidence
 
