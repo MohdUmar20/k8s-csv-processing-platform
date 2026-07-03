@@ -6,7 +6,7 @@ Enterprise-style DevOps case study for a CSV processing workload: a Python web a
 
 The project is intentionally practical. The application can be validated locally on Minikube, while the AWS and kOps assets show how the same workload would be prepared for cloud infrastructure review.
 
-## Demo Reel
+## Project Highlight
 
 ![K8s CSV Processing Platform demo reel](docs/spidersilk-neobrutalist-promo.gif)
 
