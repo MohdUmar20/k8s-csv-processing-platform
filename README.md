@@ -1,38 +1,77 @@
-# k8s-csv-processing-platform
+# K8s CSV Processing Platform
 
-A DevOps case study implementation for a CSV processing web application with local Docker/Minikube validation, Amazon S3 storage, Helm-based Kubernetes manifests, Ansible configuration management, Terraform-managed S3 lifecycle rules, and kOps reference cluster configuration.
+![K8s CSV Processing Platform banner](docs/project-banner-candidate.png)
+
+Enterprise-style DevOps case study for a CSV processing workload: a Python web application packaged with Docker, deployed to Kubernetes with Helm, configured through Ansible, backed by Amazon S3 with Glacier lifecycle management, and accompanied by reference kOps cluster creation manifests.
+
+The project is intentionally practical. The application can be validated locally on Minikube, while the AWS and kOps assets show how the same workload would be prepared for cloud infrastructure review.
+
+## Project Evidence
+
+### Application
+
+Local upload dashboard:
+
+![CSV upload dashboard](docs/app-upload-dashboard.png)
+
+Processed CSV result view:
+
+![Processed CSV result](docs/app-processed-result.png)
+
+The screenshots above were captured from the running local app with demo S3 data to avoid unnecessary AWS writes during documentation capture.
+
+### Architecture
+
+![Architecture diagram](docs/spidersilk-architecture.png)
+
+Editable Draw.io source is kept locally under `tmp/` during development and is not intended to be committed. The PNG export is stored in `docs/`.
 
 ## What This Implements
 
-- Python FastAPI web app to upload and parse CSV files in the attached `soh.csv` format.
-- CSV rows are rendered back in the browser after processing.
-- Processed source files are uploaded to Amazon S3.
-- Previously processed files are listed from S3.
-- Docker image for local/container execution.
-- Helm chart for Kubernetes reuse across environments.
-- Kubernetes pod with Nginx and the app in the same pod.
-- Shared public/static files through an `emptyDir` shared volume, not NFS.
-- Service and HorizontalPodAutoscaler.
-- Ansible-managed app/Helm configuration.
-- Terraform S3 bucket with Glacier lifecycle transition.
-- kOps cluster config examples with multiple instance groups, spot/on-demand capacity, and cluster autoscaler.
+- FastAPI web application for uploading and parsing the provided `soh.csv` format.
+- Browser UI that renders parsed CSV rows and previously processed files.
+- S3 upload path for processed source files.
+- Terraform-managed private S3 bucket with versioning, encryption, and Glacier lifecycle transition.
+- Docker image for local and Kubernetes execution.
+- Helm chart that renders reusable Kubernetes manifests.
+- Kubernetes deployment with Nginx and the FastAPI app in the same pod.
+- Shared static assets through an `emptyDir` volume, explicitly avoiding NFS.
+- Kubernetes Service and HorizontalPodAutoscaler.
+- Ansible playbook for environment-specific configuration and Helm deployment.
+- Reference kOps cluster configuration with multiple instance groups, mixed spot capacity, on-demand capacity, and Cluster Autoscaler.
+- Architecture documentation and project screenshots suitable for submission review.
 
 ## Repository Layout
 
 ```text
-app/                    FastAPI app, templates, static assets, tests dependencies
-nginx/                  Nginx sidecar config
-helm/csv-processor/     Helm chart for Minikube/Kubernetes
-terraform/              S3 bucket and lifecycle configuration
-ansible/                Localhost config management and Helm deployment playbook
-kops/                   Reference kOps cluster and autoscaler configs
-docs/                   Architecture and operational documentation
-sample-data/            Sample CSV copied from the assignment attachment
+app/                    FastAPI app, templates, and static assets
 tests/                  Unit tests for CSV parsing and app behavior
+sample-data/            Sample CSV copied from the assignment attachment
+docs/                   Architecture docs, exported diagrams, and screenshots
+infra/helm/             Helm chart for Minikube/Kubernetes
+infra/terraform/        S3 bucket and lifecycle configuration
+infra/ansible/          Config management and Helm deployment playbook
+infra/kops/             Reference kOps cluster and autoscaler configs
+infra/nginx/            Nginx sidecar config reference
+infra/scripts/          Local deployment helper scripts
 ```
+
+## Architecture Summary
+
+The local validation path runs on Minikube:
+
+```text
+Browser -> Kubernetes Service -> Nginx sidecar -> FastAPI app
+                                      |              |
+                                      |              +-> Amazon S3 processed CSV uploads
+                                      +-> emptyDir shared static files
+```
+
+Terraform provisions the S3 storage layer. Helm renders the Kubernetes workload. Ansible provides a simple configuration-management path for applying environment-specific values. kOps manifests are included as reviewable cluster creation configuration, not as a required local runtime dependency.
 
 ## Prerequisites
 
+- Python 3.11+
 - Docker
 - Minikube
 - kubectl
@@ -40,36 +79,8 @@ tests/                  Unit tests for CSV parsing and app behavior
 - Terraform
 - Ansible
 - AWS CLI configured with profile `aws-personal`
-- Python 3.11+
 
-## AWS S3 Setup
-
-The application uses real Amazon S3 in both local and Kubernetes modes. Create the bucket with Terraform:
-
-```bash
-cd terraform
-terraform init
-terraform plan -var='bucket_name=k8s-csv-processing-platform-<unique-suffix>'
-terraform apply -var='bucket_name=k8s-csv-processing-platform-<unique-suffix>'
-```
-
-Terraform defaults:
-
-- AWS profile: `aws-personal`
-- AWS region: `eu-west-1`
-- Glacier transition: after 30 days
-- Object expiration: disabled by default
-
-Export the bucket name:
-
-```bash
-export AWS_PROFILE=aws-personal
-export AWS_REGION=eu-west-1
-export S3_BUCKET_NAME=<terraform-output-bucket-name>
-export S3_UPLOAD_PREFIX=processed-csv
-```
-
-## Run Locally
+## Quick Local Run
 
 ```bash
 python3 -m venv .venv
@@ -91,7 +102,36 @@ Upload:
 sample-data/soh.csv
 ```
 
-## Run With Docker
+## AWS S3 Setup
+
+The application uses real Amazon S3 in both local and Kubernetes modes. Create the bucket with Terraform:
+
+```bash
+cd infra/terraform
+terraform init
+terraform plan -var='bucket_name=k8s-csv-processing-platform-<unique-suffix>'
+terraform apply -var='bucket_name=k8s-csv-processing-platform-<unique-suffix>'
+```
+
+Terraform defaults:
+
+- AWS profile: `aws-personal`
+- AWS region: `eu-west-1`
+- Glacier transition: after 30 days
+- Object expiration: disabled by default
+
+Export the bucket name:
+
+```bash
+export AWS_PROFILE=aws-personal
+export AWS_REGION=eu-west-1
+export S3_BUCKET_NAME=<terraform-output-bucket-name>
+export S3_UPLOAD_PREFIX=processed-csv
+```
+
+## Docker
+
+Build and run locally:
 
 ```bash
 docker build -t umar20/k8s-csv-processing-platform:0.1.0 .
@@ -104,15 +144,7 @@ docker run --rm -p 8000:8000 \
   umar20/k8s-csv-processing-platform:0.1.0
 ```
 
-If Docker Desktop hangs while pulling public images because of its credential store, use a temporary Docker config for public pulls/builds:
-
-```bash
-mkdir -p /tmp/docker-no-creds
-printf '{}' > /tmp/docker-no-creds/config.json
-DOCKER_CONFIG=/tmp/docker-no-creds docker build -t umar20/k8s-csv-processing-platform:0.1.0 .
-```
-
-## Publish Image To Docker Hub
+Publish to Docker Hub:
 
 ```bash
 docker login
@@ -120,16 +152,24 @@ docker build -t umar20/k8s-csv-processing-platform:0.1.0 .
 docker push umar20/k8s-csv-processing-platform:0.1.0
 ```
 
-## Deploy To Minikube
+If Docker Desktop hangs while pulling public images because of its credential store, use a temporary Docker config:
 
-The Helm chart pulls the application image from Docker Hub, so the same image can be used locally, in Minikube, or in another Kubernetes environment:
+```bash
+mkdir -p /tmp/docker-no-creds
+printf '{}' > /tmp/docker-no-creds/config.json
+DOCKER_CONFIG=/tmp/docker-no-creds docker build -t umar20/k8s-csv-processing-platform:0.1.0 .
+```
+
+## Minikube Deployment
+
+The Helm chart pulls the published Docker Hub image, so the same image reference can be reused across Minikube and other Kubernetes environments.
 
 ```bash
 minikube start
 minikube addons enable metrics-server
 ```
 
-Create AWS credentials secret for local Minikube testing:
+Create the namespace and local AWS credentials secret:
 
 ```bash
 kubectl create namespace csv-processor --dry-run=client -o yaml | kubectl apply -f -
@@ -139,45 +179,59 @@ kubectl -n csv-processor create secret generic aws-credentials \
   --dry-run=client -o yaml | kubectl apply -f -
 ```
 
-Deploy with Helm:
+Deploy:
 
 ```bash
-helm upgrade --install csv-processor helm/csv-processor \
+helm upgrade --install csv-processor infra/helm/csv-processor \
   --namespace csv-processor \
   --set app.awsProfile=aws-personal \
   --set app.awsRegion=eu-west-1 \
   --set app.s3BucketName="$S3_BUCKET_NAME"
 ```
 
-Access the service:
+Access:
 
 ```bash
 minikube service csv-processor -n csv-processor
 ```
 
-## Deploy With Ansible
+## Ansible Deployment
 
-Ansible stores environment-specific application settings and runs Helm deployment commands against localhost:
+Ansible stores environment-specific application settings and runs the Helm deployment against the local Kubernetes context.
 
 ```bash
-ansible-playbook -i ansible/inventory.ini ansible/playbook.yml \
+ansible-playbook -i infra/ansible/inventory.ini infra/ansible/playbook.yml \
   -e s3_bucket_name="$S3_BUCKET_NAME"
 ```
 
 ## kOps Reference
 
-The assignment asks for kOps cluster creation config but does not require a running cluster. The `kops/` directory contains reviewable configuration examples for:
+The assignment asks for Kubernetes cluster creation configuration for kOps, but does not require a running kOps cluster. The `infra/kops/` directory contains:
 
-- Cluster config
-- On-demand instance group
-- Spot instance group
-- Cluster autoscaler deployment
+- Cluster manifest
+- Master instance group
+- On-demand worker instance group
+- Mixed spot worker instance group
+- Cluster Autoscaler RBAC and deployment
+- Portable replacement values and apply notes
 
-These files are not applied during the first local validation phase.
+These files are review artifacts for the production-cluster design path. They are not required for Minikube validation.
 
-## Documentation
+## Validation Commands
 
-See [docs/architecture.md](docs/architecture.md) for architecture diagrams, data flow, and design notes.
+```bash
+make test
+make helm-template
+make helm-lint
+make terraform-validate
+make ansible-check
+```
+
+Notes:
+
+- `make test` requires Python dependencies from `make install`.
+- `make ansible-check` requires `ansible-playbook` on the local machine.
+- `make terraform-validate` expects Terraform initialization under `infra/terraform`.
 
 ## Cleanup
 
@@ -188,9 +242,13 @@ helm uninstall csv-processor -n csv-processor
 kubectl delete namespace csv-processor
 ```
 
-Destroy S3 resources when no longer needed:
+Destroy S3 resources:
 
 ```bash
-cd terraform
+cd infra/terraform
 terraform destroy -var='bucket_name=<your-bucket-name>'
 ```
+
+## Documentation
+
+See [docs/architecture.md](docs/architecture.md) for the design notes and data flow.

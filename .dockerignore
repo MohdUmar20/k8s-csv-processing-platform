@@ -1,15 +1,11 @@
 .git
 .venv
 .pytest_cache
-.terraform
+**/.terraform
 *.tfstate
 *.tfstate.*
 tmp
 docs
-terraform
-kops
-ansible
-helm
+infra
 tests
 sample-data
-

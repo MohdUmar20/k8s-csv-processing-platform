@@ -10,6 +10,7 @@ __pycache__/
 dist/
 build/
 .terraform/
+**/.terraform/
 *.tfstate
 *.tfstate.*
 tmp/

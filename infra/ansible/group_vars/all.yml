@@ -7,4 +7,4 @@ aws_profile: aws-personal
 aws_region: eu-west-1
 s3_bucket_name: ""
 s3_upload_prefix: processed-csv
-helm_chart_path: ../helm/csv-processor
+helm_chart_path: "{{ playbook_dir }}/../helm/csv-processor"

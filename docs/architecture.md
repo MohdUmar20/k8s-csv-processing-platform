@@ -36,7 +36,7 @@ flowchart TB
   Lifecycle --> Glacier["Glacier transition after 30 days"]
 ```
 
-Terraform creates only the S3 storage layer in the first phase. The bucket is private, encrypted, versioned, and configured with lifecycle transition for processed CSV objects.
+Terraform creates the S3 storage layer for processed CSV files. The bucket is private, encrypted, versioned, and configured with lifecycle transition for processed CSV objects.
 
 ## kOps Reference Architecture
 
@@ -58,5 +58,4 @@ The kOps files are provided as reviewable infrastructure configuration. They are
 - Local mode and Minikube mode both use real Amazon S3.
 - Minikube mounts AWS CLI credentials as a Kubernetes secret for local testing.
 - Production AWS deployment should replace local AWS credential secrets with IAM roles for service accounts or node instance roles.
-- DockerHub is intentionally not required for the first phase; the image is built inside Minikube.
-
+- The default Helm values use the published Docker Hub image so the same image reference can be reused across local Minikube and other Kubernetes environments.

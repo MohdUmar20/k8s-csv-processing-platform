@@ -21,16 +21,16 @@ docker-push:
 	docker push $(IMAGE)
 
 terraform-init:
-	cd terraform && terraform init
+	cd infra/terraform && terraform init
 
 terraform-validate:
-	cd terraform && terraform fmt -check && terraform validate
+	cd infra/terraform && terraform fmt -check && terraform validate
 
 helm-lint:
-	helm lint helm/csv-processor
+	helm lint infra/helm/csv-processor
 
 helm-template:
-	helm template $(HELM_RELEASE) helm/csv-processor --namespace $(HELM_NAMESPACE)
+	helm template $(HELM_RELEASE) infra/helm/csv-processor --namespace $(HELM_NAMESPACE)
 
 ansible-check:
-	ansible-playbook -i ansible/inventory.ini ansible/playbook.yml --syntax-check
+	ansible-playbook -i infra/ansible/inventory.ini infra/ansible/playbook.yml --syntax-check
