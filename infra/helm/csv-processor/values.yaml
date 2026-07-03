@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   repository: umar20/k8s-csv-processing-platform
   tag: "0.1.0"
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 nginx:
   image: nginx:1.27-alpine

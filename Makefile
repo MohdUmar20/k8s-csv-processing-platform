@@ -1,4 +1,4 @@
-.PHONY: install test run docker-build terraform-init terraform-validate helm-lint helm-template ansible-check
+.PHONY: install test run docker-build docker-push minikube-deploy terraform-init terraform-validate helm-lint helm-template ansible-check
 
 PYTHON ?= python3
 IMAGE ?= umar20/k8s-csv-processing-platform:0.1.0
@@ -19,6 +19,20 @@ docker-build:
 
 docker-push:
 	docker push $(IMAGE)
+
+minikube-deploy:
+	kubectl create namespace $(HELM_NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
+	helm upgrade --install $(HELM_RELEASE) infra/helm/csv-processor \
+		--namespace $(HELM_NAMESPACE) \
+		--set image.repository=umar20/k8s-csv-processing-platform \
+		--set image.tag=0.1.0 \
+		--set image.pullPolicy=Always \
+		--set app.awsProfile=$${AWS_PROFILE:-aws-personal} \
+		--set app.awsRegion=$${AWS_REGION:-eu-west-1} \
+		--set app.s3BucketName="$${S3_BUCKET_NAME}" \
+		--set app.s3UploadPrefix=$${S3_UPLOAD_PREFIX:-processed-csv}
+	kubectl -n $(HELM_NAMESPACE) rollout restart deployment/$(HELM_RELEASE)
+	kubectl -n $(HELM_NAMESPACE) rollout status deployment/$(HELM_RELEASE)
 
 terraform-init:
 	cd infra/terraform && terraform init

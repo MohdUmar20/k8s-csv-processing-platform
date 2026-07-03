@@ -2,7 +2,7 @@ release_name: csv-processor
 namespace: csv-processor
 image_repository: umar20/k8s-csv-processing-platform
 image_tag: "0.1.0"
-image_pull_policy: IfNotPresent
+image_pull_policy: Always
 aws_profile: aws-personal
 aws_region: eu-west-1
 s3_bucket_name: ""

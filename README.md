@@ -193,6 +193,15 @@ helm upgrade --install csv-processor infra/helm/csv-processor \
   --set app.s3BucketName="$S3_BUCKET_NAME"
 ```
 
+To force Minikube to refresh the published Docker Hub image after republishing the same tag:
+
+```bash
+export S3_BUCKET_NAME=<terraform-output-bucket-name>
+make minikube-deploy
+```
+
+This deploys `umar20/k8s-csv-processing-platform:0.1.0` with `image.pullPolicy=Always` and restarts the deployment, so Minikube pulls the current Docker Hub image instead of reusing a cached copy of the same tag.
+
 Access:
 
 ```bash
