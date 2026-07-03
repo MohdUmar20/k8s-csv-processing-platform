@@ -94,14 +94,14 @@ sample-data/soh.csv
 ## Run With Docker
 
 ```bash
-docker build -t k8s-csv-processing-platform:local .
+docker build -t umar20/k8s-csv-processing-platform:0.1.0 .
 docker run --rm -p 8000:8000 \
   -e AWS_PROFILE=aws-personal \
   -e AWS_REGION=eu-west-1 \
   -e S3_BUCKET_NAME="$S3_BUCKET_NAME" \
   -e S3_UPLOAD_PREFIX=processed-csv \
   -v "$HOME/.aws:/home/appuser/.aws:ro" \
-  k8s-csv-processing-platform:local
+  umar20/k8s-csv-processing-platform:0.1.0
 ```
 
 If Docker Desktop hangs while pulling public images because of its credential store, use a temporary Docker config for public pulls/builds:
@@ -109,18 +109,24 @@ If Docker Desktop hangs while pulling public images because of its credential st
 ```bash
 mkdir -p /tmp/docker-no-creds
 printf '{}' > /tmp/docker-no-creds/config.json
-DOCKER_CONFIG=/tmp/docker-no-creds docker build -t k8s-csv-processing-platform:local .
+DOCKER_CONFIG=/tmp/docker-no-creds docker build -t umar20/k8s-csv-processing-platform:0.1.0 .
+```
+
+## Publish Image To Docker Hub
+
+```bash
+docker login
+docker build -t umar20/k8s-csv-processing-platform:0.1.0 .
+docker push umar20/k8s-csv-processing-platform:0.1.0
 ```
 
 ## Deploy To Minikube
 
-Build the image directly inside Minikube:
+The Helm chart pulls the application image from Docker Hub, so the same image can be used locally, in Minikube, or in another Kubernetes environment:
 
 ```bash
 minikube start
 minikube addons enable metrics-server
-eval "$(minikube docker-env)"
-docker build -t k8s-csv-processing-platform:local .
 ```
 
 Create AWS credentials secret for local Minikube testing:
@@ -138,9 +144,6 @@ Deploy with Helm:
 ```bash
 helm upgrade --install csv-processor helm/csv-processor \
   --namespace csv-processor \
-  --set image.repository=k8s-csv-processing-platform \
-  --set image.tag=local \
-  --set image.pullPolicy=Never \
   --set app.awsProfile=aws-personal \
   --set app.awsRegion=eu-west-1 \
   --set app.s3BucketName="$S3_BUCKET_NAME"

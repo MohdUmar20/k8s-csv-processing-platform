@@ -1,7 +1,7 @@
 .PHONY: install test run docker-build terraform-init terraform-validate helm-lint helm-template ansible-check
 
 PYTHON ?= python3
-IMAGE ?= k8s-csv-processing-platform:local
+IMAGE ?= umar20/k8s-csv-processing-platform:0.1.0
 HELM_RELEASE ?= csv-processor
 HELM_NAMESPACE ?= csv-processor
 
@@ -17,6 +17,9 @@ run:
 docker-build:
 	docker build -t $(IMAGE) .
 
+docker-push:
+	docker push $(IMAGE)
+
 terraform-init:
 	cd terraform && terraform init
 
@@ -31,4 +34,3 @@ helm-template:
 
 ansible-check:
 	ansible-playbook -i ansible/inventory.ini ansible/playbook.yml --syntax-check
-
